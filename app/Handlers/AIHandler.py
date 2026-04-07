@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 import os
 import requests
 
-class AiHandler:
+class AIHandler:
     def __init__(self):
         load_dotenv()
         self.api_key = os.getenv('DEEPSEEK_API_KEY')
@@ -17,7 +17,7 @@ class AiHandler:
         data = {
             "model": self.model,
             "messages": [
-                {"role": "user", "content": prompt , "user_context": }
+                {"role": "user", "content": prompt}
             ],
             "max_tokens": 150
         }
