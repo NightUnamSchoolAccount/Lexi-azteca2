@@ -2,3 +2,4 @@ flask
 requests
 sqlalchemy
 python-dotenv
+flasgger

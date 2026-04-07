@@ -4,9 +4,10 @@ import requests
 
 class AiHandler:
     def __init__(self):
-        load_dotenv()  # Carga las variables de entorno desde el archivo .env
-        self.api_key = os.getenv('API_KEY_IA')  # Asegúrate de que esta variable de entorno esté configurada correctamente
-        self.api_url = "https://api.ejemplo.com/generate"  # Reemplaza con la URL real de tu API de IA
+        load_dotenv()
+        self.api_key = os.getenv('DEEPSEEK_API_KEY')
+        self.api_url = "https://api.deepseek.com/chat/completions"
+        self.model = "deepseek-chat"  # o "deepseek-reasoner" para el modelo R1
 
     def generate_response(self, prompt):
         headers = {
@@ -14,12 +15,15 @@ class AiHandler:
             'Content-Type': 'application/json'
         }
         data = {
-            'prompt': prompt,
-            'max_tokens': 150
+            "model": self.model,
+            "messages": [
+                {"role": "user", "content": prompt , "user_context": }
+            ],
+            "max_tokens": 150
         }
         response = requests.post(self.api_url, headers=headers, json=data)
-        
+
         if response.status_code == 200:
-            return response.json().get('choices', [{}])[0].get('text', '')
+            return response.json()['choices'][0]['message']['content']
         else:
             raise Exception(f"Error en la API: {response.status_code} - {response.text}")
