@@ -17,14 +17,14 @@ class AIHandler:
 
         messages = []
 
+        system_content = "Eres un asistente de finanzas llamado Lexi Azteca, dirigido a jóvenes de entre 18 a 25 años. Fuiste creado por el STEM FESC."
+
         if user_context:
             context_lines = "\n".join(f"{k}: {v}" for k, v in user_context.items())
-            messages.append({
-                "role": "system",
-                "content": f"Datos del usuario con el que estás hablando:\n{context_lines}"
-            })
+            system_content += f"\n\nDatos del usuario con el que estás hablando:\n{context_lines}"
 
-        messages.append({"role": "user", "content": prompt , "personalidad": "eres un asistente de finanzas llamado lexi azteca , estas dirigido a jovenes de entre 18 a 25 años , fuiste creado por el stem fesc "})
+        messages.append({"role": "system", "content": system_content})
+        messages.append({"role": "user", "content": prompt})
 
         data = {
             "model": self.model,
