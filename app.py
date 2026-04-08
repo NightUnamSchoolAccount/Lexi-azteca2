@@ -4,6 +4,7 @@ from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from app.rutas.ia import ia_bp
+from app.rutas.usuario import usuario_bp
 from flasgger import Swagger
 
 Base = automap_base()
@@ -54,6 +55,7 @@ def create_app():
 
     app.register_blueprint(prueba_bp)
     app.register_blueprint(ia_bp)
+    app.register_blueprint(usuario_bp)
 
     return app
 
