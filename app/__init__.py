@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from flasgger import Swagger
 from app.rutas.Ia import ia_bp
 from app.rutas.prueba import prueba_bp
+from app.rutas.usuario import usuario_bp
 
 Base = automap_base()
 
@@ -21,7 +22,7 @@ def create_app():
         }
     })
 
-    db_url = os.getenv('DATABASE_URL', 'sqlite:///lexi.db')
+    db_url = os.getenv('DATABASE_URL')
     engine = create_engine(db_url)
     Session = sessionmaker(bind=engine)
 
@@ -32,5 +33,6 @@ def create_app():
 
     app.register_blueprint(prueba_bp)
     app.register_blueprint(ia_bp)
+    app.register_blueprint(usuario_bp)
 
     return app

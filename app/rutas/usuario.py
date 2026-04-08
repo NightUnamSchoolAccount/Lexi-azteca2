@@ -1,7 +1,20 @@
 from flask import Blueprint, request, jsonify, current_app
-from app.modelos.modelo_usuario import Usuarios
+from sqlalchemy import create_engine
+from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.orm import sessionmaker
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 usuario_bp = Blueprint('usuario', __name__, url_prefix='/usuario')
+
+DATABASE_URL = os.getenv('DATABASE_URL')
+
+engine = create_engine(DATABASE_URL)
+
+Base = automap_base()
+Base.prepare(engine, reflect=True)
 
 
 @usuario_bp.route("/", methods=["POST"])
@@ -19,19 +32,21 @@ def create_usuario():
           type: object
           required:
             - user_name
+            - user_phone
+            - password
           properties:
-            user_id:
-              type: string
-              example: "a1b2c3d4-0001-4e5f-8a9b-000000000001"
             user_name:
               type: string
               example: "carlos_mx"
+            user_phone:
+              type: string
+              example: "525619283816"
             onboarding:
               type: boolean
-              example: true
-            created_at:
+              example: false
+            password:
               type: string
-              example: "2026-01-10 08:00:00"
+              example: "password123"
     responses:
       201:
         description: Usuario creado
@@ -40,8 +55,9 @@ def create_usuario():
     """
     session = current_app.Session()
     try:
-        Usuario = Usuarios
+        Usuario = Base.classes.usuarios
         data = request.get_json()
+        data.pop('user_id', None)
         nuevo = Usuario(**data)
         session.add(nuevo)
         session.commit()
@@ -67,18 +83,20 @@ def get_usuarios():
     """
     session = current_app.Session()
     try:
-        Usuario = Usuarios
+        Usuario = Base.classes.usuarios
         usuarios = session.query(Usuario).all()
         result = [
             {col.key: getattr(u, col.key) for col in Usuario.__table__.columns}
             for u in usuarios
         ]
         return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
     finally:
         session.close()
 
 
-@usuario_bp.route("/<user_id>", methods=["GET"])
+@usuario_bp.route("/<int:user_id>", methods=["GET"])
 def get_usuario(user_id):
     """
     Obtiene un usuario por ID
@@ -88,7 +106,7 @@ def get_usuario(user_id):
     parameters:
       - in: path
         name: user_id
-        type: string
+        type: integer
         required: true
     responses:
       200:
@@ -98,7 +116,7 @@ def get_usuario(user_id):
     """
     session = current_app.Session()
     try:
-        Usuario = Usuarios
+        Usuario = Base.classes.usuarios
         u = session.query(Usuario).filter_by(user_id=user_id).first()
         if u is None:
             return jsonify({"error": "Usuario no encontrado"}), 404
@@ -108,23 +126,36 @@ def get_usuario(user_id):
         session.close()
 
 
-@usuario_bp.route("/<user_id>", methods=["PUT"])
+@usuario_bp.route("/<int:user_id>", methods=["PUT"])
 def update_usuario(user_id):
     """
-    Reemplaza un usuario completo por ID
+    Actualiza un usuario por ID
     ---
     tags:
       - usuario
     parameters:
       - in: path
         name: user_id
-        type: string
+        type: integer
         required: true
       - in: body
         name: body
         required: true
         schema:
           type: object
+          properties:
+            user_name:
+              type: string
+              example: "carlos_mx"
+            user_phone:
+              type: string
+              example: "525619283816"
+            onboarding:
+              type: boolean
+              example: true
+            password:
+              type: string
+              example: "nueva_password"
     responses:
       200:
         description: Usuario actualizado
@@ -133,11 +164,12 @@ def update_usuario(user_id):
     """
     session = current_app.Session()
     try:
-        Usuario = Usuarios
+        Usuario = Base.classes.usuarios
         u = session.query(Usuario).filter_by(user_id=user_id).first()
         if u is None:
             return jsonify({"error": "Usuario no encontrado"}), 404
         data = request.get_json()
+        data.pop('user_id', None)
         for col in Usuario.__table__.columns:
             if col.key != 'user_id' and col.key in data:
                 setattr(u, col.key, data[col.key])
@@ -151,7 +183,7 @@ def update_usuario(user_id):
         session.close()
 
 
-@usuario_bp.route("/<user_id>", methods=["DELETE"])
+@usuario_bp.route("/<int:user_id>", methods=["DELETE"])
 def delete_usuario(user_id):
     """
     Elimina un usuario por ID
@@ -161,7 +193,7 @@ def delete_usuario(user_id):
     parameters:
       - in: path
         name: user_id
-        type: string
+        type: integer
         required: true
     responses:
       200:
@@ -171,7 +203,7 @@ def delete_usuario(user_id):
     """
     session = current_app.Session()
     try:
-        Usuario = Usuarios
+        Usuario = Base.classes.usuarios
         u = session.query(Usuario).filter_by(user_id=user_id).first()
         if u is None:
             return jsonify({"error": "Usuario no encontrado"}), 404
