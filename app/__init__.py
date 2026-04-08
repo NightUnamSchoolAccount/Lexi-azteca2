@@ -11,6 +11,8 @@ from app.rutas.whatsapp import wa_bp
 from app.rutas.ranking import rk_bp
 from app.rutas.missiones import ms_bl
 from app.rutas.simulador import sim_bl
+from app.rutas.telegram import tg_bp
+
 from flask_cors import CORS
 from app.scheduler import init_scheduler
 from app.seed import seed_usuarios
@@ -19,7 +21,7 @@ Base = automap_base()
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)
+    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
     Swagger(app, template={
         "info": {
             "title": "Lexi Azteca API",
@@ -46,5 +48,7 @@ def create_app():
     app.register_blueprint(sim_bl)
     seed_usuarios(engine)
     init_scheduler(Session)
+    
+    app.register_blueprint(tg_bp)
 
     return app

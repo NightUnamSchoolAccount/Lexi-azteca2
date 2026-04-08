@@ -31,15 +31,19 @@ def login():
         schema:
           type: object
           required:
+            - user_phone
             - user_name
             - password
           properties:
-            user_name:
+            user_phone:
               type: string
-              example: "carlos_mx"
+              example: "525619283816"
             password:
               type: string
               example: "password123"
+            user_name:
+              type: string
+              example: "carlos_mx"
     responses:
       200:
         description: Login exitoso
@@ -49,17 +53,18 @@ def login():
     session = current_app.Session()
     try:
         data = request.get_json()
-        user_name = data.get('user_name')
+        user_phone = data.get('user_phone')
         password = data.get('password')
+        user_name = data.get('user_name')
 
-        if not user_name or not password:
-            return jsonify({"error": "user_name y password son requeridos"}), 400
+        if not user_phone or not password or not user_name  :
+            return jsonify({"error": "user_phone, password y user_name son requeridos"}), 400
 
         Usuario = Base.classes.usuarios
-        u = session.query(Usuario).filter_by(user_name=user_name, password=password).first()
+        u = session.query(Usuario).filter_by(user_phone=user_phone, password=password, user_name=user_name).first()
 
         if u is None:
-            return jsonify({"error": "Usuario o contraseña incorrectos"}), 401
+            return jsonify({"error": "Usuario , o telefono o contraseña incorrectos"}), 401
 
         result = {col.key: getattr(u, col.key) for col in Usuario.__table__.columns if col.key != 'password'}
         return jsonify({"message": "Login exitoso", "usuario": result}), 200
