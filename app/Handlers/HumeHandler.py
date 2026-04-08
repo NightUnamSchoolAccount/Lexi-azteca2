@@ -16,8 +16,8 @@ class HumeHandler:
 
         # Enviar el archivo para análisis
         files = {"file": (filename, audio_bytes, "audio/ogg")}
-        data = {"models": '{"prosody": {}}'}
-        response = requests.post(f"{self.base_url}/jobs", headers=headers, files=files, data=data)
+        json_body = {"models": {"prosody": {}}}
+        response = requests.post(f"{self.base_url}/jobs", headers=headers, files=files, json=json_body)
 
         if response.status_code != 200:
             raise Exception(f"Error Hume submit: {response.status_code} - {response.text}")
