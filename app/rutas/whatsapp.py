@@ -55,6 +55,7 @@ def receive_webhook():
         description: Error al procesar el mensaje
     """
     data = request.get_json()
+    print("WEBHOOK RECIBIDO:", data)
 
     try:
         entry = data.get('entry', [])[0]
@@ -90,6 +91,7 @@ def receive_webhook():
         return jsonify({"status": "ok", "from": from_number, "type": msg_type}), 200
 
     except Exception as e:
+        print("WEBHOOK ERROR:", str(e))
         return jsonify({"error": str(e)}), 400
 
 
