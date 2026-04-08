@@ -8,8 +8,9 @@ from app.rutas.Ia import ia_bp
 from app.rutas.prueba import prueba_bp
 from app.rutas.usuario import usuario_bp
 from app.rutas.whatsapp import wa_bp
+from app.rutas.ranking import rk_bp
 from flask_cors import CORS
-
+from app.scheduler import init_scheduler
 Base = automap_base()
 
 
@@ -37,5 +38,8 @@ def create_app():
     app.register_blueprint(ia_bp)
     app.register_blueprint(usuario_bp)
     app.register_blueprint(wa_bp)
+    app.register_blueprint(rk_bp)
+
+    init_scheduler(Session)
 
     return app
