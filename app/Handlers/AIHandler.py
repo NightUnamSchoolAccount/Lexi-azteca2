@@ -9,16 +9,26 @@ class AIHandler:
         self.api_url = "https://api.deepseek.com/chat/completions"
         self.model = "deepseek-chat"  # o "deepseek-reasoner" para el modelo R1
 
-    def generate_response(self, prompt):
+    def generate_response(self, prompt, user_context: dict = None):
         headers = {
             'Authorization': f'Bearer {self.api_key}',
             'Content-Type': 'application/json'
         }
+
+        messages = []
+
+        if user_context:
+            context_lines = "\n".join(f"{k}: {v}" for k, v in user_context.items())
+            messages.append({
+                "role": "system",
+                "content": f"Datos del usuario con el que estás hablando:\n{context_lines}"
+            })
+
+        messages.append({"role": "user", "content": prompt})
+
         data = {
             "model": self.model,
-            "messages": [
-                {"role": "user", "content": prompt}
-            ],
+            "messages": messages,
             "max_tokens": 150
         }
         response = requests.post(self.api_url, headers=headers, json=data)

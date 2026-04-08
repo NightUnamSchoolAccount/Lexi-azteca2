@@ -1,6 +1,9 @@
 from flask import Blueprint, request, jsonify
 from app.Handlers.WhatsAppHandler import WhatsAppHandler
+from app.Handlers.AIHandler import AIHandler
+from app.Helpers.UsuarioHelper import UsuarioHelper
 import os
+import random
 
 wa_bp = Blueprint('whatsapp', __name__, url_prefix='/whatsapp')
 
@@ -67,9 +70,22 @@ def receive_webhook():
         msg_type = message.get('type')
 
         if msg_type == 'text':
-            text = message['text']['body']
-            handler = WhatsAppHandler()
-            handler.send_text(from_number, f"Recibí tu mensaje: {text}")
+            text = message['text']['body'].strip().lower()
+            wa = WhatsAppHandler()
+
+            if text == 'quiero registrarme':
+                helper = UsuarioHelper()
+                if helper.phone_exists(from_number):
+                    wa.send_text(from_number, "Tu telefono ya esta registrado en la base de datos")
+                else:
+                    codigo = random.randint(100000, 999999)
+                    wa.send_text(from_number, f"Tu codigo es: {codigo}")
+            else:
+                helper = UsuarioHelper()
+                user_context = helper.get_by_phone(from_number)
+                ai = AIHandler()
+                respuesta = ai.generate_response(text, user_context)
+                wa.send_text(from_number, respuesta)
 
         return jsonify({"status": "ok", "from": from_number, "type": msg_type}), 200
 
