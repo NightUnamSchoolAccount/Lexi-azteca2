@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from app.rutas.Ia import ia_bp
 from app.rutas.usuario import usuario_bp
 from app.rutas.whatsapp import wa_bp
+from app.rutas.missiones import ms_bl
 from flasgger import Swagger
 
 Base = automap_base()
