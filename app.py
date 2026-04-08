@@ -7,6 +7,7 @@ from app.rutas.Ia import ia_bp
 from app.rutas.usuario import usuario_bp
 from app.rutas.whatsapp import wa_bp
 from flasgger import Swagger
+from flask_cors import CORS
 
 Base = automap_base()
 
@@ -36,6 +37,8 @@ def hello_world():
 
 def create_app():
     app = Flask(__name__)
+
+    CORS(app)
 
     Swagger(app, template={
         "info": {
