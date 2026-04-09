@@ -37,9 +37,13 @@ def registrar_transaccion(engine, user_id, amount, category, description):
             ).returning(*transacciones_table.columns)
         ).fetchone()
 
-        # Actualizar cant_rest y recalcular financial_health
+        # Actualizar cant_rest y recalcular financial_health como porcentaje
         nuevo_cant_rest = float(wallet.cant_rest) - float(amount)
-        nuevo_health = nuevo_cant_rest >= float(wallet.low_range)
+        monthly_balance_num = float(wallet.monthly_balance)
+        if monthly_balance_num > 0:
+            nuevo_health = round(max(0, min(100, (nuevo_cant_rest / monthly_balance_num) * 100)), 2)
+        else:
+            nuevo_health = 0
 
         conn.execute(
             wallet_table.update()
@@ -52,6 +56,6 @@ def registrar_transaccion(engine, user_id, amount, category, description):
         "transaccion": {k: str(v) if v is not None else None for k, v in row_tx._mapping.items()},
         "wallet": {
             "cant_rest": round(nuevo_cant_rest, 2),
-            "financial_health": nuevo_health,
+            "financial_health_pct": nuevo_health,
         }
     }, None
