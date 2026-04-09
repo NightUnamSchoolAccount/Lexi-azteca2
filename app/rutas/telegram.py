@@ -50,6 +50,9 @@ def receive_webhook():
         if msg_type == 'text':
             text = message['text'].strip().lower()
             user_context = helper.get_by_username(telegram_username)
+            user_id = user_context.get('user_id')
+            financial_context = helper.get_financial_context(user_id)
+            user_context.update(financial_context)
             ai = AIHandler()
             respuesta = ai.generate_response(text, user_context)
             tg.send_message(chat_id, respuesta)
@@ -78,6 +81,10 @@ def receive_webhook():
 
                 # 4. Obtener contexto del usuario
                 user_context = helper.get_by_username(telegram_username) or {}
+                user_id = user_context.get('user_id')
+                if user_id:
+                    financial_context = helper.get_financial_context(user_id)
+                    user_context.update(financial_context)
 
                 # Agregar emociones al contexto si las hay
                 if emociones:
